@@ -12,7 +12,7 @@ struct TeacherList: View {
         NavigationView{
             List(teachers, id: \.self){ teacher in
                 NavigationLink {
-                    TeacherDes(teacher: teacher)
+                    TeacherDes(teacher: teacher, depth: 0)
                 } label: {
                     Text(teacher)
                 }.navigationTitle("Teacher List")

@@ -10,28 +10,33 @@ import SwiftUI
 struct TeacherDes: View {
     @State private var showGreeting = true
     var teacher: String
+    var depth : Int
     var tc = getTeacherClasses()
     var teacher_des = getTeacherDes()
     var teacher_des_eng = getTeacherDesEng()
     var body: some View {
-        VStack{
-        Toggle("中文/English", isOn: $showGreeting)
-                        .toggleStyle(SwitchToggleStyle(tint: .red))
-        if showGreeting {
-            Text(teacher_des[teacher]!)
-        }else{
-            Text(teacher_des_eng[teacher]!)
-        }
-        NavigationView{
-            List(tc[teacher]!, id: \.self){ subject in
-                NavigationLink {
-                    CourseDes(courses: subject)
-                } label: {
-                    Text(subject)
-                }.navigationTitle("Subject List")
+        if depth < 2 {
+            VStack{
+                Text(teacher).frame(maxWidth: .infinity, alignment:.center).font(Font.title.weight(.black)).multilineTextAlignment(.center)
+                Toggle("中文/English", isOn: $showGreeting)
+                    .toggleStyle(SwitchToggleStyle(tint: .red))
+                if showGreeting {
+                    Text(teacher_des[teacher]!)
+                }else{
+                    Text(teacher_des_eng[teacher]!)
+                }
+                if depth < 1 {
+                    NavigationView{
+                        List(tc[teacher]!, id: \.self){ subject in
+                            NavigationLink {
+                                CourseDes(courses: subject, depth: depth+1)
+                            } label: {
+                                Text(subject)
+                            }.navigationTitle("Subject List")
+                        }
+                    }.navigationViewStyle(DefaultNavigationViewStyle())
+                }
             }
-        }.navigationViewStyle(DefaultNavigationViewStyle())
-        .navigationTitle(teacher)
         }
     }
 }
