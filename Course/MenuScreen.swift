@@ -3,7 +3,7 @@ import SwiftUI
 struct MenuScreen: View {
     @State private var username = ""
     @State private var password = ""
-    @State private var wrongUsernameOrPassword: Bool = false
+    @State private var loginErrorMessage: String? = nil
     @State private var loggedInUser: String? = nil
     @State private var users: [String: String] = ["admin": "adminpassword"]
     @State private var registrationUsername = ""
@@ -21,6 +21,12 @@ struct MenuScreen: View {
                     Group {
                         TextField("Username", text: $username).padding(.all, 10).background(Color.black.opacity(0.05)).cornerRadius(10).padding(.bottom)
                         SecureField("Password", text: $password).padding(.all, 10).background(Color.black.opacity(0.05)).cornerRadius(10).padding(.bottom)
+                        
+                        // Display login error message
+                        if let message = loginErrorMessage {
+                            Text(message).foregroundColor(.red)
+                        }
+                        
                         Button("Login") {
                             authenticateUser(username: username, password: password)
                         }
@@ -86,11 +92,15 @@ struct MenuScreen: View {
     }
     
     func authenticateUser(username: String, password: String) {
-        if let storedPassword = users[username], storedPassword == password {
-            loggedInUser = username
-            self.wrongUsernameOrPassword = false
+        if let storedPassword = users[username] {
+            if storedPassword == password {
+                loggedInUser = username
+                loginErrorMessage = nil
+            } else {
+                loginErrorMessage = "Incorrect password"
+            }
         } else {
-            self.wrongUsernameOrPassword = true
+            loginErrorMessage = "Username not found"
         }
     }
     
@@ -108,6 +118,9 @@ struct MenuScreen: View {
         return String((0..<length).map{ _ in letters.randomElement()! })
     }
 }
+
+// Rest of your code...
+
 
 struct UserView: View {
     var username: String
