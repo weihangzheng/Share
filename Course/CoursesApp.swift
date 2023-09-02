@@ -6,9 +6,16 @@
 //
 
 import SwiftUI
+import Firebase
 
 @main
 struct CoursesApp: App {
+    init() {
+            FirebaseApp.configure()
+            Database.database().isPersistenceEnabled = true
+
+
+        }
     var body: some Scene {
         WindowGroup {
             MenuScreen()
