@@ -80,9 +80,6 @@ struct MenuScreen: View {
                             Text("Students: Course List （课程清单）").padding(.all, 10).background(Color.green).foregroundColor(.white).cornerRadius(10).padding(.bottom)
                         }
                     }
-                    
-                    Text("Registration Link:").padding(.bottom)
-                    Text("https://forms.gle/ssNuJa9hSpAU4wfU7").padding(.bottom)
                 }
                 .padding()
                 .onAppear {
@@ -98,20 +95,27 @@ struct MenuScreen: View {
     }
     
     func authenticateUser(username: String, password: String) {
-            let ref = Database.database().reference().child("users").child(username)
-            ref.observe(.value) { snapshot in
-                if let storedPassword = snapshot.value as? String {
-                    if storedPassword == password {
-                        loggedInUser = username
-                        loginErrorMessage = nil
-                    } else {
-                        loginErrorMessage = "Incorrect password"
-                    }
+        // Check if the fields are empty
+        if username.isEmpty || password.isEmpty {
+            loginErrorMessage = "Both fields must be filled in"
+            return
+        }
+
+        let ref = Database.database().reference().child("users").child(username)
+        ref.observe(.value) { snapshot in
+            if let storedPassword = snapshot.value as? String {
+                if storedPassword == password {
+                    loggedInUser = username
+                    loginErrorMessage = nil
                 } else {
-                    loginErrorMessage = "Username not found"
+                    loginErrorMessage = "Incorrect password"
                 }
+            } else {
+                loginErrorMessage = "Username not found"
             }
         }
+    }
+
     
     func registerUser(username: String, secretPassword: String) {
             if secretPassword == registrationSecret && !username.isEmpty {
@@ -229,27 +233,35 @@ struct AdminView: View {
 
     
     var body: some View {
-        NavigationView {
-            List(users, id: \.self) { user in
-                if user.lowercased() != "admin" {
-                    NavigationLink(destination: AdminUserView(username: user)) {
-                        Text(user)
-                    }
-                    .contextMenu { // Use context menu for better UX
-                        Button(action: {
-                            deleteUser(username: user)
-                        }) {
-                            Text("Delete User")
-                            Image(systemName: "trash")
-                        }
-                    }
-                }
-            }
-
-            .onAppear(perform: loadUsers)
-        }
-
-    }
+           NavigationView {
+               ScrollView {
+                   VStack {
+                       ForEach(users, id: \.self) { user in
+                           if user.lowercased() != "admin" {
+                               NavigationLink(destination: AdminUserView(username: user)) {
+                                   Text(user)
+                                       .frame(maxWidth: .infinity, alignment: .leading)
+                                       .padding()
+                                       .background(Color.gray.opacity(0.1))
+                                       .cornerRadius(10)
+                                       .padding([.horizontal, .top])
+                               }
+                               .contextMenu {
+                                   Button(action: {
+                                       deleteUser(username: user)
+                                   }) {
+                                       Text("Delete User")
+                                       Image(systemName: "trash")
+                                   }
+                               }
+                           }
+                       }
+                   }
+                   .padding(.bottom)
+               }
+               .onAppear(perform: loadUsers)
+           }
+       }
     
     func loadUsers() {
         let ref = Database.database().reference().child("users")
